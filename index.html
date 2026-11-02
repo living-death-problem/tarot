@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>星轨塔罗 · Astral Tarot</title>
+<meta name="description" content="78 张韦特塔罗在线占卜：选择主题与牌阵，抽牌、翻牌，获得正逆位解释与整体解读。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M24 4l3.6 16.4L44 24l-16.4 3.6L24 44l-3.6-16.4L4 24l16.4-3.6z' fill='%23c9a86a'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css?v=20261029-5">
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="veil" aria-hidden="true"></div>
+
+<header class="site-head">
+  <div class="shell head-inner">
+    <button class="brand" type="button" data-view="reading" aria-label="回到占卜">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2">
+          <circle cx="24" cy="24" r="20" stroke-dasharray="2 5" opacity=".55"/>
+          <path d="M24 7l3.1 13.9L41 24l-13.9 3.1L24 41l-3.1-13.9L7 24l13.9-3.1z" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <span class="brand-text"><strong>星轨塔罗</strong><small>ASTRAL TAROT</small></span>
+    </button>
+    <nav class="nav" aria-label="主导航">
+      <button class="nav-btn is-active" type="button" data-view="reading">占卜</button>
+      <button class="nav-btn" type="button" data-view="library">牌库</button>
+      <button class="nav-btn" type="button" data-view="history">记录<span class="nav-count" id="history-count" hidden>0</span></button>
+    </nav>
+  </div>
+</header>
+
+<main class="shell" id="main">
+
+  <!-- ========== 占卜 ========== -->
+  <section class="view" id="view-reading">
+
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="rule"></span>SEVENTY-EIGHT CARDS · ONE QUESTION</p>
+        <h1>把问题<br><em>交给牌面</em></h1>
+        <p class="lede">韦特体系 78 张塔罗，正位与逆位，七种主题，八种牌阵。它不替你决定，只把此刻的纹理照亮。</p>
+        <ul class="hero-stats">
+          <li><b>78</b><span>张牌</span></li>
+          <li><b>7</b><span>种主题</span></li>
+          <li><b>8</b><span>种牌阵</span></li>
+        </ul>
+      </div>
+
+      <aside class="daily" aria-labelledby="daily-title">
+        <div class="daily-top">
+          <div>
+            <p class="eyebrow">DAILY DRAW</p>
+            <h2 id="daily-title">今日之牌</h2>
+          </div>
+          <time id="daily-date"></time>
+        </div>
+        <div class="daily-stage" id="daily-stage"></div>
+        <div class="daily-info" id="daily-info">
+          <p class="daily-hint">轻触牌背，看看今天的提示。</p>
+        </div>
+        <button class="link-btn" type="button" id="daily-detail" hidden>查看完整牌义 →</button>
+      </aside>
+    </section>
+
+    <section class="panel setup" id="setup" aria-labelledby="setup-title">
+      <div class="panel-title">
+        <span class="index">01</span>
+        <div>
+          <h2 id="setup-title">开始一次占卜</h2>
+          <p>先选主题，再选牌阵。不明白术语？点旁边的 ? 看解释。</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <h3>占卜主题</h3>
+          <button class="help-btn" type="button" data-help="topic" aria-expanded="false" aria-controls="help-topic" aria-label="解释占卜主题">?</button>
+          <span>决定解读的角度</span>
+        </div>
+        <div class="help-box" id="help-topic" role="note" hidden>
+          <strong>主题是什么？</strong>主题决定解读的角度。同一张牌，选「财运」会按收入、支出与资源解释；选「爱情婚姻」会按关系与感受解释。先选最贴近你问题的那一个。
+        </div>
+        <div class="topic-grid" id="topic-grid" role="group" aria-label="占卜主题"></div>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <h3>你的问题</h3>
+          <button class="help-btn" type="button" data-help="question" aria-expanded="false" aria-controls="help-question" aria-label="解释如何写问题">?</button>
+          <span>选填 · 最多 80 字</span>
+        </div>
+        <div class="help-box" id="help-question" role="note" hidden>
+          <strong>问题怎么写？</strong>越具体越好。与其问「我的人生会怎样」，不如问「未来三个月我该把重心放在哪」。也可以留空，只选主题和牌阵。
+        </div>
+        <input class="text-input" id="question" type="text" maxlength="80" autocomplete="off"
+               placeholder="例如：我和 TA 的关系接下来会如何发展？">
+        <div class="prompt-row" id="prompts"></div>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <h3>牌阵</h3>
+          <button class="help-btn" type="button" data-help="spread" aria-expanded="false" aria-controls="help-spread" aria-label="解释牌阵">?</button>
+          <span>抽牌张数与位置含义</span>
+        </div>
+        <div class="help-box" id="help-spread" role="note" hidden>
+          <strong>牌阵是什么？</strong>牌阵 = 抽几张牌，以及每张牌放在什么位置。位置本身有含义：例如「时间之流」的第三张代表未来走向。新手先用单张或三张，熟悉后再用凯尔特十字。
+        </div>
+        <div class="spread-grid" id="spread-grid" role="group" aria-label="牌阵"></div>
+        <div class="free-count" id="free-count" hidden>
+          <div class="free-count-copy">
+            <strong>自由抽牌张数</strong>
+            <span id="free-count-note">1–78 张 · 按抽牌顺序解读</span>
+          </div>
+          <div class="free-count-control">
+            <button class="count-btn" type="button" data-free-step="-1" aria-label="减少一张">−</button>
+            <input class="count-input" id="free-count-input" type="number" min="1" max="78" value="3" inputmode="numeric" aria-label="自由抽牌张数">
+            <button class="count-btn" type="button" data-free-step="1" aria-label="增加一张">+</button>
+            <span class="count-unit">张</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="draw-bar">
+        <div class="switch-group">
+          <div class="switch-item">
+            <label class="switch">
+              <input type="checkbox" id="allow-rev" checked>
+              <span class="track" aria-hidden="true"></span>
+              <span class="switch-text">启用逆位</span>
+            </label>
+            <button class="help-btn" type="button" data-help="reverse" aria-expanded="false" aria-controls="help-reverse" aria-label="解释逆位">?</button>
+          </div>
+          <div class="switch-item">
+            <label class="switch">
+              <input type="checkbox" id="only-major">
+              <span class="track" aria-hidden="true"></span>
+              <span class="switch-text">仅大阿卡纳</span>
+            </label>
+            <button class="help-btn" type="button" data-help="major" aria-expanded="false" aria-controls="help-major" aria-label="解释大阿卡纳">?</button>
+          </div>
+        </div>
+        <span class="deck-note" id="deck-note">78 张 · 洗牌后不放回</span>
+        <button class="btn btn-primary" type="button" id="draw-btn">
+          <span>洗牌并抽牌</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <div class="help-box" id="help-reverse" role="note" hidden>
+        <strong>逆位是什么？</strong>逆位 = 牌面上下颠倒；正位就是正常朝向，代表这股能量较顺畅地表达。逆位不代表「坏牌」，通常表示这股能量受阻、过度、向内收，或时机还没到。新手可以先关掉，只看正位。
+      </div>
+      <div class="help-box" id="help-major" role="note" hidden>
+        <strong>大阿卡纳是什么？</strong>78 张塔罗分两部分：大阿卡纳 22 张（编号 0–21），讲人生的大主题与阶段；小阿卡纳 56 张，分权杖、圣杯、宝剑、星币四组，讲日常细节。开启后只用 22 张主牌，适合看大方向。
+      </div>
+    </section>
+
+    <section class="reading" id="reading" hidden aria-live="polite">
+      <div class="reading-head">
+        <div class="reading-copy">
+          <p class="eyebrow" id="reading-meta"></p>
+          <h2 id="reading-title"></h2>
+          <p class="reading-q" id="reading-question"></p>
+        </div>
+        <div class="reading-tools">
+          <button class="btn btn-ghost" type="button" id="reveal-all">全部翻开</button>
+          <button class="btn btn-ghost" type="button" id="redraw">重新洗牌</button>
+          <button class="btn btn-ghost" type="button" id="edit-setup">更改设置</button>
+        </div>
+      </div>
+
+      <div class="board-wrap">
+        <div class="board" id="board"></div>
+        <div class="pick-tray" id="pick-tray" hidden></div>
+        <p class="flip-hint" id="flip-hint">轻触牌背翻开 · 已翻开 <span id="flip-count">0</span>/<span id="flip-total">0</span></p>
+      </div>
+
+      <div class="details" id="details"></div>
+      <div class="summary" id="summary" hidden></div>
+    </section>
+
+  </section>
+
+  <!-- ========== 牌库 ========== -->
+  <section class="view" id="view-library" hidden>
+    <div class="section-head">
+      <div>
+        <p class="eyebrow"><span class="rule"></span>THE FULL DECK</p>
+        <h2>牌库</h2>
+        <p>22 张大阿卡纳（主牌，讲大主题与阶段）与 56 张小阿卡纳（日常牌，分权杖、圣杯、宝剑、星币四组）。点开任意一张，查看正逆位牌义与主题解读。</p>
+      </div>
+    </div>
+    <div class="lib-tools">
+      <div class="tabs" id="lib-tabs" role="tablist" aria-label="牌库筛选">
+        <button class="tab is-active" type="button" data-tab="all">全部 78</button>
+        <button class="tab" type="button" data-tab="major">大阿卡纳 22</button>
+        <button class="tab" type="button" data-tab="wands">权杖 14</button>
+        <button class="tab" type="button" data-tab="cups">圣杯 14</button>
+        <button class="tab" type="button" data-tab="swords">宝剑 14</button>
+        <button class="tab" type="button" data-tab="pentacles">星币 14</button>
+      </div>
+      <input class="text-input lib-search" id="lib-search" type="search" placeholder="搜索牌名、英文或关键词" autocomplete="off">
+    </div>
+    <div class="lib-grid" id="lib-grid"></div>
+    <p class="empty" id="lib-empty" hidden>没有匹配的牌，换个关键词试试。</p>
+  </section>
+
+  <!-- ========== 记录 ========== -->
+  <section class="view" id="view-history" hidden>
+    <div class="section-head">
+      <div>
+        <p class="eyebrow"><span class="rule"></span>YOUR READINGS</p>
+        <h2>占卜记录</h2>
+        <p>每次完整翻开后自动保存在本机浏览器，不会上传。最多保留 60 条。</p>
+      </div>
+      <button class="btn btn-ghost btn-danger" type="button" id="clear-history">清空记录</button>
+    </div>
+    <div class="history-list" id="history-list"></div>
+    <div class="empty-state" id="history-empty" hidden>
+      <span class="empty-mark">✦</span>
+      <p>还没有记录。完成一次占卜，把牌面留在这里。</p>
+      <button class="btn btn-primary" type="button" data-view="reading">去占卜</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-foot">
+  <div class="shell">
+    <p>塔罗呈现的是倾向，不是判决；不替代医疗、法律与投资建议。选择权始终在你手里。</p>
+    <p class="foot-meta">星轨塔罗 · 78 张韦特体系 · 数据仅存本机</p>
+  </div>
+</footer>
+
+<!-- 牌义弹窗 -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-backdrop" data-close="modal"></div>
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal-close" type="button" id="modal-close" aria-label="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<noscript><p class="noscript">这个页面需要 JavaScript 才能洗牌与翻牌，请在浏览器设置中启用。</p></noscript>
+
+<script src="assets/data-core.js?v=20261029-5"></script>
+<script src="assets/data-major.js?v=20261029-5"></script>
+<script src="assets/data-minor.js?v=20261029-5"></script>
+<script src="assets/app.js?v=20261029-5"></script>
+</body>
+</html>
